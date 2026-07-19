@@ -265,7 +265,7 @@ export function runReconciliation(userId: string): ReconciliationReport {
         if (!amountsCloseEnough(invoice.extracted_amount, bestMatch.extracted_amount)) {
           if (diff > 0.5) {
             // Underpayment
-            const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} for ${invoice.extracted_currency || "$"}${invoice.extracted_amount} was underpaid — received ${bestMatch.extracted_currency || "$"}${bestMatch.extracted_amount}`;
+            const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} — amount received (${bestMatch.extracted_currency || "$"}${bestMatch.extracted_amount}) doesn't match the invoice (${invoice.extracted_currency || "$"}${invoice.extracted_amount}) — worth a look`;
             discrepancies.push({
               type: "underpayment",
               description: desc,
@@ -275,7 +275,7 @@ export function runReconciliation(userId: string): ReconciliationReport {
             });
           } else if (diff < -0.5) {
             // Overpayment
-            const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} for ${invoice.extracted_currency || "$"}${invoice.extracted_amount} was overpaid — received ${bestMatch.extracted_currency || "$"}${bestMatch.extracted_amount}`;
+            const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} — amount received (${bestMatch.extracted_currency || "$"}${bestMatch.extracted_amount}) doesn't match the invoice (${invoice.extracted_currency || "$"}${invoice.extracted_amount}) — worth a look`;
             discrepancies.push({
               type: "overpayment",
               description: desc,
@@ -289,7 +289,7 @@ export function runReconciliation(userId: string): ReconciliationReport {
     } else {
       // No matching payment found — check if overdue
       if (isOverdue(invoice.extracted_due_date)) {
-        const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} for ${invoice.extracted_currency || "$"}${invoice.extracted_amount || "?"} is overdue (due ${invoice.extracted_due_date})`;
+        const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} for ${invoice.extracted_currency || "$"}${invoice.extracted_amount || "?"} is past its due date (due ${invoice.extracted_due_date}) — worth a look`;
         discrepancies.push({
           type: "overdue",
           description: desc,
@@ -299,7 +299,7 @@ export function runReconciliation(userId: string): ReconciliationReport {
         });
       } else {
         // Missing payment (not yet due)
-        const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} for ${invoice.extracted_currency || "$"}${invoice.extracted_amount || "?"} has no matching payment`;
+        const desc = `Invoice ${invoice.extracted_invoice_number || invoice.subject} for ${invoice.extracted_currency || "$"}${invoice.extracted_amount || "?"} — no matching payment found yet — worth a look`;
         discrepancies.push({
           type: "missing_payment",
           description: desc,

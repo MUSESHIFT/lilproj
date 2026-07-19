@@ -24,19 +24,20 @@ export const Route = createFileRoute("/dashboard")({
         typeof params.connected === "string" ? params.connected : undefined,
     };
   },
-  loader: async ({ search }) => {
+  loader: async () => {
     const { user } = await getCurrentUser();
     const gmailConnection = user ? await getGmailConnection() : { connected: false };
     const emailCount = user ? await getEmailCount() : { count: 0 };
     const pipelineStats = user ? await getPipelineStats() : null;
-    return { user, gmail: gmailConnection, emailCount: emailCount.count, pipelineStats, search };
+    return { user, gmail: gmailConnection, emailCount: emailCount.count, pipelineStats };
   },
   component: DashboardPage,
 });
 
 function DashboardPage() {
-  const { user, gmail: initialGmail, emailCount: initialEmailCount, pipelineStats: initialPipelineStats, search } =
+  const { user, gmail: initialGmail, emailCount: initialEmailCount, pipelineStats: initialPipelineStats } =
     Route.useLoaderData();
+  const search = Route.useSearch();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
   const [gmail, setGmail] = useState<GmailConnection>(initialGmail);
@@ -454,7 +455,6 @@ function DashboardPage() {
                   </div>
                 </div>
               )}
-            </div>
 
             {/* Weekly Digest Section */}
             <div className="rounded-xl border border-gray-100 bg-white shadow-sm">

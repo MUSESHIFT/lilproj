@@ -4,6 +4,7 @@
 // it from client bundles.
 
 import { getDb, generateId } from "./db";
+import { encrypt } from "./crypto";
 
 export async function validateSession(token: string | undefined): Promise<string | null> {
   if (!token) return null;
@@ -103,8 +104,8 @@ export function storeGmailTokens(
        SET access_token = ?, refresh_token = ?, token_expiry = ?, gmail_email = ?, updated_at = datetime('now')
        WHERE user_id = ?`,
     ).run(
-      tokens.access_token,
-      tokens.refresh_token,
+      encrypt(tokens.access_token),
+      encrypt(tokens.refresh_token),
       tokenExpiry,
       tokens.email,
       userId,
@@ -117,8 +118,8 @@ export function storeGmailTokens(
     ).run(
       id,
       userId,
-      tokens.access_token,
-      tokens.refresh_token,
+      encrypt(tokens.access_token),
+      encrypt(tokens.refresh_token),
       tokenExpiry,
       tokens.email,
     );

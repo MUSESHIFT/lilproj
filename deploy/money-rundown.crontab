@@ -1,0 +1,15 @@
+# money rundown — scheduled jobs
+# install with:  crontab deploy/money-rundown.crontab
+# (or paste these lines into `crontab -e`)
+#
+# adjust APP_DIR to wherever you cloned the repo on the droplet.
+# both jobs cd into the app so bun picks up .env, then run a package script.
+# output is appended to a log on the persistent disk for easy tailing.
+
+APP_DIR=/root/money-rundown
+
+# fetch + classify gmail money mail every 6 hours (00:00, 06:00, 12:00, 18:00)
+0 */6 * * * cd $APP_DIR && /usr/local/bin/bun run cron:fetch >> $APP_DIR/data/cron.log 2>&1
+
+# build + send the weekly digest — mondays at 08:00
+0 8 * * 1 cd $APP_DIR && /usr/local/bin/bun run cron:digest >> $APP_DIR/data/cron.log 2>&1

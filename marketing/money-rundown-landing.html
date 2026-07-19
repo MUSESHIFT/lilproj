@@ -146,6 +146,38 @@
   }
   .ql-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
   .ql-btn:active { transform: translateY(0); }
+  .ql-btn[disabled] { opacity: .6; pointer-events: none; }
+
+  /* inline email capture */
+  .ql-capture {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ql-final .ql-capture { justify-content: center; }
+  .ql-capture-input {
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 14px 20px;
+    flex: 1 1 240px;
+    min-width: 220px;
+    max-width: 320px;
+    transition: border-color .2s;
+  }
+  .ql-capture-input::placeholder { color: var(--ink-faint); }
+  .ql-capture-input:focus { outline: none; border-color: var(--accent); }
+  .ql-capture-msg {
+    flex-basis: 100%;
+    margin: 6px 0 0;
+    font-size: 15px;
+    color: var(--accent-ink);
+  }
+  .ql-final .ql-capture-msg { text-align: center; }
 
   /* sections */
   section { padding: 66px 0; }
@@ -484,8 +516,8 @@
   <nav class="ql-nav">
     <div class="ql-wrap ql-nav-inner">
       <a class="ql-mark" href="#top">
-        <span class="tl-glyph">tl</span>
-        <span class="ql-wordmark">thawline</span>
+        <span class="tl-glyph">mr</span>
+        <span class="ql-wordmark">money rundown</span>
       </a>
       <a class="ql-nav-cta" href="#start">start free</a>
     </div>
@@ -495,9 +527,13 @@
     <div class="ql-wrap">
       <p class="ql-eyebrow">a weekly money digest for people who freelance</p>
       <h1 class="ql-headline">your invoices didn't disappear. your nervous system just stopped opening them.</h1>
-      <p class="ql-subhead">thawline connects to your gmail and emails you one calm summary a week — what you're owed, what's overdue, and what's worth a second look. no dashboard, no spreadsheet, no folder rules.</p>
+      <p class="ql-subhead">money rundown connects to your gmail and emails you one calm summary a week — what you're owed, what's overdue, and what's worth a second look. no dashboard, no spreadsheet, no folder rules.</p>
       <div class="ql-hero-actions">
-        <a class="ql-btn" href="#start">start free</a>
+        <form class="ql-capture" data-waitlist>
+          <input class="ql-capture-input" type="email" name="email" placeholder="you@email.com" required aria-label="your email" autocomplete="email" />
+          <button class="ql-btn" type="submit">start free</button>
+          <p class="ql-capture-msg" hidden></p>
+        </form>
         <span class="ql-fineprint">no credit card · one email a week</span>
       </div>
     </div>
@@ -515,7 +551,7 @@
         </div>
         <div class="ql-step">
           <span class="ql-step-num">2</span>
-          <h3>thawline reads the money</h3>
+          <h3>money rundown reads the money</h3>
           <p>it scans your inbox for invoices you sent, bills you owe, and payments that landed — and quietly matches them up.</p>
         </div>
         <div class="ql-step">
@@ -533,7 +569,7 @@
       <h2 class="ql-h2">the folder exists. you made it.</h2>
       <p>you named it something like "invoices 2024" or "money stuff DO NOT IGNORE." you haven't opened it in six weeks.</p>
       <p><span class="ql-emph">this is not a discipline problem, not laziness</span> — this is what freeze looks like when it lives in your inbox. your nervous system learned money admin means bad news, so it makes the folder a room you can't enter.</p>
-      <p>the money doesn't go away. it just sits there, accruing silence. <span class="ql-emph">thawline goes in the room for you.</span></p>
+      <p>the money doesn't go away. it just sits there, accruing silence. <span class="ql-emph">money rundown goes in the room for you.</span></p>
     </div>
   </section>
 
@@ -589,7 +625,7 @@
         <li>you've done unpaid work and aren't sure how much.</li>
         <li>your relationship with money admin is close-the-tab-deal-with-it-later.</li>
       </ul>
-      <p><span class="ql-emph">you are not bad at money</span> — your nervous system was protecting you. thawline is the handoff.</p>
+      <p><span class="ql-emph">you are not bad at money</span> — your nervous system was protecting you. money rundown is the handoff.</p>
     </div>
   </section>
 
@@ -607,7 +643,7 @@
         <div class="ql-tier is-featured">
           <p class="ql-tier-name">standard</p>
           <p class="ql-tier-price">$9<span> / mo</span></p>
-          <p class="ql-tier-sub">the full thawline</p>
+          <p class="ql-tier-sub">the full money rundown</p>
           <p class="ql-tier-desc">unlimited tracking, mismatch and duplicate flagging, your own overdue thresholds.</p>
         </div>
         <div class="ql-tier">
@@ -641,7 +677,11 @@
       <div class="ql-final-card">
         <h2 class="ql-h2">connect your gmail. get your first digest.</h2>
         <p>no credit card. one email a week, telling you where your money is.</p>
-        <a class="ql-btn" href="#start">start free</a>
+        <form class="ql-capture" data-waitlist>
+          <input class="ql-capture-input" type="email" name="email" placeholder="you@email.com" required aria-label="your email" autocomplete="email" />
+          <button class="ql-btn" type="submit">start free</button>
+          <p class="ql-capture-msg" hidden></p>
+        </form>
       </div>
     </div>
   </section>
@@ -649,11 +689,56 @@
   <footer class="ql-footer">
     <div class="ql-wrap ql-footer-inner">
       <a class="ql-mark" href="#top">
-        <span class="tl-glyph">tl</span>
-        <span class="ql-wordmark">thawline</span>
+        <span class="tl-glyph">mr</span>
+        <span class="ql-wordmark">money rundown</span>
       </a>
       <span>the tool that handles the money-admin your nervous system won't let you open.</span>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var forms = document.querySelectorAll("form[data-waitlist]");
+      Array.prototype.forEach.call(forms, function (form) {
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var input = form.querySelector('input[type="email"]');
+          var btn = form.querySelector("button");
+          var msg = form.querySelector(".ql-capture-msg");
+          var email = (input.value || "").trim();
+          if (!email) return;
+          btn.disabled = true;
+          fetch("/api/waitlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email }),
+          })
+            .then(function (r) {
+              return r
+                .json()
+                .catch(function () { return {}; })
+                .then(function (d) { return { ok: r.ok, data: d }; });
+            })
+            .then(function (res) {
+              msg.hidden = false;
+              if (res.ok && res.data && res.data.ok) {
+                input.hidden = true;
+                btn.hidden = true;
+                msg.textContent = "you're on the list. your first rundown is coming.";
+              } else {
+                btn.disabled = false;
+                msg.textContent =
+                  (res.data && res.data.error) || "something went sideways — worth a look. try again?";
+              }
+            })
+            .catch(function () {
+              btn.disabled = false;
+              msg.hidden = false;
+              msg.textContent = "something went sideways — worth a look. try again?";
+            });
+        });
+      });
+    })();
+  </script>
 
 </div>

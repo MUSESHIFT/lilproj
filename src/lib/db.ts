@@ -91,6 +91,15 @@ export function getDb(): Database.Database {
     }
   }
 
+  // Waitlist table
+  _db.exec(`
+    CREATE TABLE IF NOT EXISTS waitlist (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
   // Discrepancies table
   _db.exec(`
     CREATE TABLE IF NOT EXISTS discrepancies (
@@ -115,6 +124,7 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_emails_gmail_id ON emails(gmail_id);
     CREATE INDEX IF NOT EXISTS idx_discrepancies_user_id ON discrepancies(user_id);
     CREATE INDEX IF NOT EXISTS idx_discrepancies_email_id ON discrepancies(email_id);
+    CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email);
   `);
 
   return _db;

@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { randomBytes } from "node:crypto";
 import { getDb, generateId } from "./db";
+import { encrypt, decrypt } from "./crypto";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -108,18 +110,18 @@ async function getValidAccessToken(userId: string): Promise<string> {
   const now = Date.now() + 60_000;
 
   if (now < expiry) {
-    return row.access_token;
+    return decrypt(row.access_token);
   }
 
   // Refresh the token
-  const refreshed = await refreshAccessToken(row.refresh_token);
+  const refreshed = await refreshAccessToken(decrypt(row.refresh_token));
   const newExpiry = new Date(
     Date.now() + refreshed.expires_in * 1000,
   ).toISOString();
 
   db.prepare(
     "UPDATE gmail_tokens SET access_token = ?, token_expiry = ?, updated_at = datetime('now') WHERE user_id = ?",
-  ).run(refreshed.access_token, newExpiry, userId);
+  ).run(encrypt(refreshed.access_token), newExpiry, userId);
 
   return refreshed.access_token;
 }
@@ -141,10 +143,15 @@ export const getGoogleOAuthUrl = createServerFn({ method: "GET" }).handler(
       return { error: "google_not_configured" };
     }
 
-    // Use session token prefix as CSRF state
-    const { getCookie } = await import("@tanstack/react-start/server");
-    const sessionToken = getCookie(SESSION_COOKIE) ?? "";
-    const state = sessionToken.slice(0, 32);
+    // Generate a random CSRF state nonce and store it in an httpOnly cookie
+    const { setCookie } = await import("@tanstack/react-start/server");
+    const state = randomBytes(16).toString("hex");
+    setCookie("mr_oauth_state", state, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 600,
+      sameSite: "lax",
+    });
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -177,13 +184,16 @@ export const completeGmailAuth = createServerFn({ method: "POST" })
     if (!userId) return { success: false, error: "not_authenticated" };
 
     // Validate state (CSRF protection)
-    const { getCookie } = await import("@tanstack/react-start/server");
-    const sessionToken = getCookie(SESSION_COOKIE) ?? "";
-    const expectedState = sessionToken.slice(0, 32);
+    const { getCookie, deleteCookie } = await import(
+      "@tanstack/react-start/server"
+    );
+    const expectedState = getCookie("mr_oauth_state") ?? "";
 
-    if (data.state !== expectedState) {
+    if (!expectedState || data.state !== expectedState) {
       return { success: false, error: "state_mismatch" };
     }
+
+    deleteCookie("mr_oauth_state", { path: "/" });
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -252,8 +262,8 @@ export const completeGmailAuth = createServerFn({ method: "POST" })
            SET access_token = ?, refresh_token = ?, token_expiry = ?, gmail_email = ?, updated_at = datetime('now')
            WHERE user_id = ?`,
         ).run(
-          tokenData.access_token,
-          tokenData.refresh_token,
+          encrypt(tokenData.access_token),
+          encrypt(tokenData.refresh_token),
           tokenExpiry,
           profile.emailAddress,
           userId,
@@ -266,8 +276,8 @@ export const completeGmailAuth = createServerFn({ method: "POST" })
         ).run(
           id,
           userId,
-          tokenData.access_token,
-          tokenData.refresh_token,
+          encrypt(tokenData.access_token),
+          encrypt(tokenData.refresh_token),
           tokenExpiry,
           profile.emailAddress,
         );

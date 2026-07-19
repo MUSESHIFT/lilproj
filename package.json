@@ -1,5 +1,5 @@
 {
-  "name": "thawline",
+  "name": "money-rundown",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -9,19 +9,23 @@
     "start": "bun run serve.ts",
     "publish": "bash ./publish.sh",
     "go-live": "bash ./go-live.sh",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "cron:fetch": "bun run scripts/cron-fetch-process.ts",
+    "cron:digest": "bun run scripts/cron-weekly-digest.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "@tanstack/react-router": "^1.158.1",
     "@tanstack/react-start": "^1.158.3",
     "better-sqlite3": "^12.11.1",
+    "nodemailer": "^6.9.16",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/nodemailer": "^6.4.17",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
