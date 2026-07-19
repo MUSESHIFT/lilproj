@@ -1,9 +1,9 @@
-import nodemailer from "nodemailer";
-
 /**
- * Send one email over SMTP. Zero-cost path: free Gmail SMTP with an app
- * password (SMTP_PASS is a Gmail app password, never the login password).
- * Configured entirely from env so no secrets live in the repo.
+ * Send one email via Resend's HTTP API (port 443).
+ *
+ * The droplet blocks outbound SMTP (25/465/587), so nodemailer/SMTP can't be
+ * used there — Resend goes over HTTPS. RESEND_API_KEY is a send-only key;
+ * MAIL_FROM must be a Resend-verified sender (or onboarding@resend.dev).
  */
 export async function sendMail(opts: {
   to: string;
@@ -11,30 +11,28 @@ export async function sendMail(opts: {
   html: string;
   text: string;
 }): Promise<void> {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? "587");
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const key = process.env.RESEND_API_KEY;
   const from = process.env.MAIL_FROM;
-
-  if (!host || !user || !pass || !from) {
-    throw new Error(
-      "SMTP_HOST, SMTP_USER, SMTP_PASS and MAIL_FROM must be set to send email",
-    );
+  if (!key || !from) {
+    throw new Error("RESEND_API_KEY and MAIL_FROM must be set to send email");
   }
 
-  const transport = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [opts.to],
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text,
+    }),
   });
 
-  await transport.sendMail({
-    from,
-    to: opts.to,
-    subject: opts.subject,
-    text: opts.text,
-    html: opts.html,
-  });
+  if (!res.ok) {
+    throw new Error(`resend send failed: ${res.status} ${await res.text()}`);
+  }
 }
