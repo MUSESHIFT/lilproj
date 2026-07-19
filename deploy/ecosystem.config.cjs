@@ -1,29 +1,26 @@
-// PM2 process config for money rundown.
-// start with:   pm2 start deploy/ecosystem.config.cjs
-// then persist:  pm2 save   (and `pm2 startup` once, to survive reboots)
+// PM2 config for money rundown on the MuseShift droplet.
 //
-// note: env lives in .env in the app dir. PM2 does not read .env itself, but
-// the process here is `bun run serve.ts`, and bun auto-loads .env from cwd —
-// so keep `cwd` pointed at the repo root and your .env there.
-// (if you prefer PM2 to own the env, swap in `env_file: ".env"` under this app.)
-
+// Binds 127.0.0.1:3100 (nginx proxies rundown.museshift.com -> here) via the
+// prod entry server-prod.ts — NOT serve.ts, which would try to seize port 3000
+// and kill SilverBullet. Bun auto-loads secrets from .env in cwd, so no secrets
+// live here. Build first:  bun run build
+//
+//   pm2 start deploy/ecosystem.config.cjs && pm2 save
 module.exports = {
   apps: [
     {
       name: "money-rundown",
-      script: "serve.ts",
-      interpreter: "bun",
-      // interpreter_args left empty — `bun serve.ts` is the effective command.
+      script: "server-prod.ts",
+      interpreter: "/root/.bun/bin/bun",
       cwd: "/root/money-rundown",
-      // serve.ts pins port 3000. make sure nothing else on the droplet
-      // already holds 3000 (silverbullet does by default — remap one of them).
       env: {
         NODE_ENV: "production",
-        PORT: "3000",
+        PORT: "3100",
+        HOST: "127.0.0.1",
       },
       autorestart: true,
       max_restarts: 10,
-      max_memory_restart: "300M",
+      max_memory_restart: "350M",
       out_file: "/root/money-rundown/data/pm2-out.log",
       error_file: "/root/money-rundown/data/pm2-err.log",
     },
