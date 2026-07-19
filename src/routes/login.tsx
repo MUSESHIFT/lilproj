@@ -50,10 +50,10 @@ function LoginPage() {
         <div className="text-center mb-8">
           <a href="/" className="inline-flex items-center gap-2.5">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-              tl
+              mr
             </span>
             <span className="text-xl font-semibold tracking-tight text-gray-900">
-              thawline
+              money rundown
             </span>
           </a>
         </div>

@@ -252,7 +252,7 @@ function formatDate(dateStr: string): string {
 
 /**
  * Convert a digest to a plain-text email body.
- * thawline voice: lowercase-leaning, calm, no alarm. flags "worth a look",
+ * money rundown voice: lowercase-leaning, calm, no alarm. flags "worth a look",
  * never accuses.
  */
 export function formatDigestAsText(digest: DigestData): string {
@@ -266,7 +266,7 @@ export function formatDigestAsText(digest: DigestData): string {
   const lines: string[] = [];
 
   // 1. header / date anchor
-  lines.push(`thawline · week of ${dateRange.start}`);
+  lines.push(`money rundown · week of ${dateRange.start}`);
   lines.push("here's where your money is.");
   lines.push("");
 
@@ -358,7 +358,7 @@ export function formatDigestAsText(digest: DigestData): string {
 
   // 7. footer / controls
   lines.push("─────────────────────────────");
-  lines.push("thawline reads your gmail · read-only, always");
+  lines.push("money rundown reads your gmail · read-only, always");
   lines.push("your data doesn't train anything · deletes on cancel");
   lines.push("adjust settings · change tier · pause digest · cancel");
 
@@ -367,7 +367,7 @@ export function formatDigestAsText(digest: DigestData): string {
 
 /**
  * Convert a digest to a simple HTML email body.
- * thawline voice: calm, lowercase-leaning, no alarm. flags "worth a look",
+ * money rundown voice: calm, lowercase-leaning, no alarm. flags "worth a look",
  * never accuses.
  */
 export function formatDigestAsHtml(digest: DigestData): string {
@@ -387,7 +387,7 @@ export function formatDigestAsHtml(digest: DigestData): string {
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937; line-height: 1.6;">
   <!-- 1. header / date anchor -->
   <div style="padding: 24px 0; border-bottom: 1px solid #e5e7eb;">
-    <h1 style="font-size: 18px; color: #374151; margin: 0; font-weight: 600;">thawline · week of ${dateRange.start}</h1>
+    <h1 style="font-size: 18px; color: #374151; margin: 0; font-weight: 600;">money rundown · week of ${dateRange.start}</h1>
     <p style="color: #6b7280; margin: 8px 0 0; font-size: 15px;">
       here's where your money is.
     </p>
@@ -485,7 +485,7 @@ export function formatDigestAsHtml(digest: DigestData): string {
   <!-- 7. footer / controls -->
   <div style="text-align: center; padding: 24px 0 8px; border-top: 1px solid #e5e7eb; margin-top: 32px;">
     <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-      thawline reads your gmail · read-only, always
+      money rundown reads your gmail · read-only, always
     </p>
     <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0;">
       your data doesn't train anything · deletes on cancel

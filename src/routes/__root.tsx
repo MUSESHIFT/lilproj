@@ -13,7 +13,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "thawline — Know what you're owed" },
+      { title: "money rundown — Know what you're owed" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -1,4 +1,4 @@
-# thawline · money-clarity template
+# money rundown · money-clarity template
 
 the money-admin your nervous system won't let you open. handled.
 
@@ -132,7 +132,7 @@ ten minutes. one day a week. that's the ritual.
 
 ---
 
-> ### thawline · week of [DATE]
+> ### money rundown · week of [DATE]
 >
 > [first name], here's where your money is.
 >
@@ -186,7 +186,7 @@ ten minutes. one day a week. that's the ritual.
 >
 > ---
 >
-> thawline reads your Gmail · read-only, always
+> money rundown reads your Gmail · read-only, always
 > your data doesn't train anything · deletes on cancel
 >
 > adjust settings · change tier · pause digest · cancel
@@ -227,7 +227,7 @@ that's the whole trigger list. if none are true, the box stays empty.
 when the week isn't a normal week, the header block changes. swap in the matching line. no shame lives in any of these.
 
 **new account**
-> thawline is reading. your first real digest arrives next week.
+> money rundown is reading. your first real digest arrives next week.
 
 **all clear**
 > nothing owed, nothing overdue, nothing flagged. that's the whole picture.
