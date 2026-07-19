@@ -8,8 +8,10 @@
 // Run `bun run build` first, then start under PM2 (see deploy/ecosystem.config.cjs).
 import handler from "./dist/server/server.js";
 
-const PORT = Number(process.env.PORT ?? "3100");
-const HOST = process.env.HOST ?? "127.0.0.1";
+// Dedicated vars — the host globally exports PORT (=3854 for its app cluster),
+// which must NOT hijack this server. Read MR_PORT/MR_HOST instead.
+const PORT = Number(process.env.MR_PORT ?? "3100");
+const HOST = process.env.MR_HOST ?? "127.0.0.1";
 const CLIENT_DIR = `${import.meta.dir}/dist/client`;
 
 Bun.serve({

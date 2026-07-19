@@ -15,8 +15,8 @@ module.exports = {
       cwd: "/root/money-rundown",
       env: {
         NODE_ENV: "production",
-        PORT: "3100",
-        HOST: "127.0.0.1",
+        MR_PORT: "3100",
+        MR_HOST: "127.0.0.1",
       },
       autorestart: true,
       max_restarts: 10,
