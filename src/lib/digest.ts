@@ -252,127 +252,131 @@ function formatDate(dateStr: string): string {
 
 /**
  * Convert a digest to a plain-text email body.
+ * thawline voice: lowercase-leaning, calm, no alarm. flags "worth a look",
+ * never accuses.
  */
 export function formatDigestAsText(digest: DigestData): string {
   const { dateRange, summary, invoices, payments, discrepancies } = digest;
 
+  // "overdue" items live in the same discrepancies list; split them out so the
+  // remaining items render under "worth a look" (mismatches, duplicates, etc.).
+  const overdue = discrepancies.filter((d) => d.type === "overdue");
+  const worthALook = discrepancies.filter((d) => d.type !== "overdue");
+
   const lines: string[] = [];
 
-  lines.push("═══════════════════════════════════════════");
-  lines.push("  Quiet Ledge — Weekly Finance Digest");
-  lines.push("═══════════════════════════════════════════");
-  lines.push("");
-  lines.push(
-    `Period: ${dateRange.start} → ${dateRange.end}`,
-  );
-  lines.push(`Generated: ${formatDate(digest.generatedAt)}`);
+  // 1. header / date anchor
+  lines.push(`thawline · week of ${dateRange.start}`);
+  lines.push("here's where your money is.");
   lines.push("");
 
-  // Summary section
-  lines.push("─── Summary ───────────────────────────────");
+  // 2. what arrived (paid)
+  lines.push("what arrived");
   lines.push("");
-  lines.push(
-    `  Invoices: ${summary.invoiceCount} — Total ${formatCurrency(summary.totalInvoiced, summary.currency)}`,
-  );
-  lines.push(
-    `  Payments:  ${summary.paymentCount} — Total ${formatCurrency(summary.totalPaid, summary.currency)}`,
-  );
-  lines.push(
-    `  Outstanding balance: ${formatCurrency(summary.outstandingBalance, summary.currency)}`,
-  );
-  if (summary.discrepancyCount > 0) {
-    lines.push(`  ⚠ Discrepancies: ${summary.discrepancyCount}`);
+  if (payments.length === 0) {
+    lines.push("  nothing arrived this week.");
+  } else {
+    for (const pay of payments) {
+      const amt = formatCurrency(pay.amount, pay.currency || summary.currency);
+      const sender = pay.sender || "unknown";
+      lines.push(`  ${sender} · ${amt} · received ${formatDate(pay.date)}`);
+    }
   }
   lines.push("");
 
-  // Invoices section
-  lines.push("─── Recent Invoices ───────────────────────");
+  // 3. what you're owed (outstanding)
+  lines.push("what you're owed");
   lines.push("");
   if (invoices.length === 0) {
-    lines.push("  No invoices found this week.");
+    lines.push("  nothing outstanding this week.");
   } else {
     for (const inv of invoices) {
-      const num = inv.invoiceNumber ? ` (#${inv.invoiceNumber})` : "";
+      const num = inv.invoiceNumber ? ` · #${inv.invoiceNumber}` : "";
       const amt = formatCurrency(inv.amount, inv.currency || summary.currency);
-      const sender = inv.sender || "Unknown";
-      lines.push(`  • ${sender} — ${amt}${num}`);
-      lines.push(`    ${inv.subject}`);
-      if (inv.dueDate) {
-        lines.push(`    Due: ${inv.dueDate}`);
+      const sender = inv.sender || "unknown";
+      const due = inv.dueDate ? ` · due ${inv.dueDate}` : "";
+      lines.push(`  ${sender} · ${amt} · sent ${formatDate(inv.date)}${due}${num}`);
+    }
+    lines.push("");
+    lines.push(
+      `  you have ${formatCurrency(summary.outstandingBalance, summary.currency)} outstanding across ${summary.invoiceCount} invoice${summary.invoiceCount === 1 ? "" : "s"}.`,
+    );
+  }
+  lines.push("");
+
+  // 4. overdue
+  lines.push("overdue");
+  lines.push("");
+  if (overdue.length === 0) {
+    lines.push("  nothing overdue this week.");
+  } else {
+    for (const d of overdue) {
+      lines.push(`  ${d.description}`);
+      if (d.amountDiff !== null) {
+        lines.push(
+          `    amount: ${summary.currency} ${d.amountDiff.toFixed(2)}`,
+        );
       }
     }
   }
   lines.push("");
 
-  // Payments section
-  lines.push("─── Recent Payments ───────────────────────");
+  // 5. worth a look (flagged)
+  lines.push("worth a look");
   lines.push("");
-  if (payments.length === 0) {
-    lines.push("  No payments received this week.");
+  if (worthALook.length === 0) {
+    lines.push("  nothing flagged this week.");
   } else {
-    for (const pay of payments) {
-      const amt = formatCurrency(pay.amount, pay.currency || summary.currency);
-      const sender = pay.sender || "Unknown";
-      lines.push(`  • ${sender} — ${amt}`);
-      lines.push(`    ${pay.subject}`);
-    }
-  }
-  lines.push("");
-
-  // Discrepancies section
-  if (discrepancies.length > 0) {
-    lines.push("─── Discrepancies ⚠ ───────────────────────");
-    lines.push("");
-    for (const d of discrepancies) {
-      const label = {
-        underpayment: "UNDERPAID",
-        overpayment: "OVERPAID",
-        missing_payment: "MISSING",
-        overdue: "OVERDUE",
-      }[d.type] || d.type.toUpperCase();
-      lines.push(`  [${label}] ${d.description}`);
+    for (const d of worthALook) {
+      // NOTE: d.description strings can read accusatory — they originate in
+      // reconciliation.ts. softening them there is a follow-up; the framing
+      // around them here stays calm.
+      lines.push(`  worth a look · ${d.description}`);
       if (d.amountDiff !== null) {
         lines.push(
-          `           Difference: ${summary.currency} ${d.amountDiff.toFixed(2)}`,
+          `    the numbers were off by ${summary.currency} ${d.amountDiff.toFixed(2)}.`,
         );
       }
     }
     lines.push("");
+    lines.push(
+      "  this doesn't mean something's wrong. it means the numbers didn't match cleanly.",
+    );
   }
+  lines.push("");
 
-  lines.push("───────────────────────────────────────────");
-  lines.push("  Powered by Quiet Ledge");
-  lines.push("  https://quietledge.com");
-  lines.push("───────────────────────────────────────────");
+  // 6. weekly snapshot
+  lines.push("this week");
+  lines.push("");
+  lines.push(
+    `  paid · ${formatCurrency(summary.totalPaid, summary.currency)}`,
+  );
+  lines.push(`  outstanding · ${summary.invoiceCount}`);
+  lines.push(`  overdue · ${overdue.length}`);
+  lines.push(`  flagged · ${worthALook.length}`);
+  lines.push("");
+
+  // 7. footer / controls
+  lines.push("─────────────────────────────");
+  lines.push("thawline reads your gmail · read-only, always");
+  lines.push("your data doesn't train anything · deletes on cancel");
+  lines.push("adjust settings · change tier · pause digest · cancel");
 
   return lines.join("\n");
 }
 
 /**
  * Convert a digest to a simple HTML email body.
+ * thawline voice: calm, lowercase-leaning, no alarm. flags "worth a look",
+ * never accuses.
  */
 export function formatDigestAsHtml(digest: DigestData): string {
   const { dateRange, summary, invoices, payments, discrepancies } = digest;
 
-  const discrepancyLabel = (type: string): string => {
-    const map: Record<string, string> = {
-      underpayment: "Underpaid",
-      overpayment: "Overpaid",
-      missing_payment: "Missing Payment",
-      overdue: "Overdue",
-    };
-    return map[type] || type;
-  };
-
-  const discrepancyColor = (type: string): string => {
-    const map: Record<string, string> = {
-      underpayment: "#d97706",
-      overpayment: "#2563eb",
-      missing_payment: "#dc2626",
-      overdue: "#991b1b",
-    };
-    return map[type] || "#6b7280";
-  };
+  // "overdue" items share the discrepancies list; split them out so the rest
+  // render under "worth a look" (mismatches, duplicates, unmatched charges).
+  const overdue = discrepancies.filter((d) => d.type === "overdue");
+  const worthALook = discrepancies.filter((d) => d.type !== "overdue");
 
   return `<!DOCTYPE html>
 <html>
@@ -381,103 +385,113 @@ export function formatDigestAsHtml(digest: DigestData): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937; line-height: 1.6;">
-  <div style="text-align: center; padding: 24px 0; border-bottom: 2px solid #4f46e5;">
-    <h1 style="font-size: 22px; color: #4f46e5; margin: 0;">📊 Quiet Ledge Weekly Digest</h1>
-    <p style="color: #6b7280; margin: 8px 0 0; font-size: 14px;">
-      ${dateRange.start} → ${dateRange.end}
+  <!-- 1. header / date anchor -->
+  <div style="padding: 24px 0; border-bottom: 1px solid #e5e7eb;">
+    <h1 style="font-size: 18px; color: #374151; margin: 0; font-weight: 600;">thawline · week of ${dateRange.start}</h1>
+    <p style="color: #6b7280; margin: 8px 0 0; font-size: 15px;">
+      here's where your money is.
     </p>
   </div>
 
-  <!-- Summary -->
-  <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin: 24px 0;">
-    <h2 style="font-size: 16px; margin: 0 0 16px; color: #374151;">Summary</h2>
-    <table style="width: 100%; border-collapse: collapse;">
-      <tr>
-        <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Invoices</td>
-        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${summary.invoiceCount}</td>
-        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${summary.currency} ${summary.totalInvoiced.toFixed(2)}</td>
-      </tr>
-      <tr>
-        <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Payments</td>
-        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${summary.paymentCount}</td>
-        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${summary.currency} ${summary.totalPaid.toFixed(2)}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px 0 0; font-size: 14px; font-weight: 700; color: ${summary.outstandingBalance > 0 ? '#dc2626' : '#059669'};">
-          Outstanding
-        </td>
-        <td colspan="2" style="padding: 8px 0 0; text-align: right; font-weight: 700; color: ${summary.outstandingBalance > 0 ? '#dc2626' : '#059669'};">
-          ${summary.currency} ${summary.outstandingBalance.toFixed(2)}
-        </td>
-      </tr>
-      ${summary.discrepancyCount > 0 ? `
-      <tr>
-        <td style="padding: 8px 0 0; font-size: 14px; font-weight: 700; color: #dc2626;">
-          ⚠ Discrepancies
-        </td>
-        <td colspan="2" style="padding: 8px 0 0; text-align: right; font-weight: 700; color: #dc2626;">
-          ${summary.discrepancyCount}
-        </td>
-      </tr>` : ""}
-    </table>
-  </div>
-
-  <!-- Invoices -->
+  <!-- 2. what arrived -->
   <div style="margin: 24px 0;">
-    <h2 style="font-size: 16px; margin: 0 0 12px; color: #374151;">📄 Recent Invoices</h2>
-    ${invoices.length === 0
-      ? '<p style="color: #9ca3af; font-size: 14px;">No invoices found this week.</p>'
-      : invoices.map((inv) => `
-        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
-          <div style="display: flex; justify-content: space-between; align-items: baseline;">
-            <strong style="font-size: 14px;">${inv.sender || "Unknown"}</strong>
-            <span style="font-weight: 600; color: #4f46e5;">${formatCurrency(inv.amount, inv.currency || summary.currency)}</span>
-          </div>
-          <p style="margin: 4px 0 0; font-size: 13px; color: #6b7280;">${inv.subject}</p>
-          ${inv.invoiceNumber ? `<span style="font-size: 12px; color: #9ca3af;">#${inv.invoiceNumber}</span>` : ""}
-          ${inv.dueDate ? `<span style="font-size: 12px; color: #9ca3af; margin-left: 8px;">Due: ${inv.dueDate}</span>` : ""}
-        </div>
-      `).join("")}
-  </div>
-
-  <!-- Payments -->
-  <div style="margin: 24px 0;">
-    <h2 style="font-size: 16px; margin: 0 0 12px; color: #374151;">💰 Recent Payments</h2>
+    <h2 style="font-size: 15px; margin: 0 0 12px; color: #374151; font-weight: 600;">what arrived</h2>
     ${payments.length === 0
-      ? '<p style="color: #9ca3af; font-size: 14px;">No payments received this week.</p>'
+      ? '<p style="color: #9ca3af; font-size: 14px;">nothing arrived this week.</p>'
       : payments.map((pay) => `
         <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: baseline;">
-            <strong style="font-size: 14px;">${pay.sender || "Unknown"}</strong>
-            <span style="font-weight: 600; color: #059669;">${formatCurrency(pay.amount, pay.currency || summary.currency)}</span>
+            <strong style="font-size: 14px;">${pay.sender || "unknown"}</strong>
+            <span style="font-weight: 600; color: #374151;">${formatCurrency(pay.amount, pay.currency || summary.currency)}</span>
           </div>
-          <p style="margin: 4px 0 0; font-size: 13px; color: #6b7280;">${pay.subject}</p>
+          <p style="margin: 4px 0 0; font-size: 12px; color: #9ca3af;">received ${formatDate(pay.date)}</p>
         </div>
       `).join("")}
   </div>
 
-  <!-- Discrepancies -->
-  ${discrepancies.length > 0 ? `
+  <!-- 3. what you're owed -->
   <div style="margin: 24px 0;">
-    <h2 style="font-size: 16px; margin: 0 0 12px; color: #dc2626;">⚠ Discrepancies</h2>
-    ${discrepancies.map((d) => `
-      <div style="border: 1px solid #fca5a5; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: #fef2f2;">
-        <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; color: white; background: ${discrepancyColor(d.type)};">
-          ${discrepancyLabel(d.type)}
-        </span>
-        <p style="margin: 8px 0 0; font-size: 13px; color: #374151;">${d.description}</p>
-        ${d.amountDiff !== null ? `<p style="margin: 4px 0 0; font-size: 12px; color: #6b7280;">Difference: ${summary.currency} ${d.amountDiff.toFixed(2)}</p>` : ""}
-      </div>
-    `).join("")}
-  </div>` : ""}
+    <h2 style="font-size: 15px; margin: 0 0 12px; color: #374151; font-weight: 600;">what you're owed</h2>
+    ${invoices.length === 0
+      ? '<p style="color: #9ca3af; font-size: 14px;">nothing outstanding this week.</p>'
+      : invoices.map((inv) => `
+        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <strong style="font-size: 14px;">${inv.sender || "unknown"}</strong>
+            <span style="font-weight: 600; color: #374151;">${formatCurrency(inv.amount, inv.currency || summary.currency)}</span>
+          </div>
+          <p style="margin: 4px 0 0; font-size: 12px; color: #9ca3af;">sent ${formatDate(inv.date)}${inv.invoiceNumber ? ` · #${inv.invoiceNumber}` : ""}${inv.dueDate ? ` · due ${inv.dueDate}` : ""}</p>
+        </div>
+      `).join("")}
+    ${invoices.length === 0 ? "" : `<p style="margin: 12px 0 0; font-size: 14px; color: #6b7280;">you have <strong>${summary.currency} ${summary.outstandingBalance.toFixed(2)}</strong> outstanding across ${summary.invoiceCount} invoice${summary.invoiceCount === 1 ? "" : "s"}.</p>`}
+  </div>
 
-  <!-- Footer -->
+  <!-- 4. overdue -->
+  <div style="margin: 24px 0;">
+    <h2 style="font-size: 15px; margin: 0 0 12px; color: #374151; font-weight: 600;">overdue</h2>
+    ${overdue.length === 0
+      ? '<p style="color: #9ca3af; font-size: 14px;">nothing overdue this week.</p>'
+      : overdue.map((d) => `
+        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+          <p style="margin: 0; font-size: 13px; color: #374151;">${d.description}</p>
+          ${d.amountDiff !== null ? `<p style="margin: 4px 0 0; font-size: 12px; color: #9ca3af;">amount: ${summary.currency} ${d.amountDiff.toFixed(2)}</p>` : ""}
+        </div>
+      `).join("")}
+  </div>
+
+  <!-- 5. worth a look -->
+  <div style="margin: 24px 0;">
+    <h2 style="font-size: 15px; margin: 0 0 12px; color: #374151; font-weight: 600;">worth a look</h2>
+    ${worthALook.length === 0
+      ? '<p style="color: #9ca3af; font-size: 14px;">nothing flagged this week.</p>'
+      : worthALook.map((d) => `
+        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: #fafafa;">
+          <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; color: #6b7280; background: #f3f4f6;">
+            worth a look
+          </span>
+          <!-- NOTE: d.description strings can read accusatory — they originate in
+               reconciliation.ts. softening them there is a follow-up; the framing
+               here stays calm. -->
+          <p style="margin: 8px 0 0; font-size: 13px; color: #374151;">${d.description}</p>
+          ${d.amountDiff !== null ? `<p style="margin: 4px 0 0; font-size: 12px; color: #9ca3af;">the numbers were off by ${summary.currency} ${d.amountDiff.toFixed(2)}.</p>` : ""}
+        </div>
+      `).join("")}
+    ${worthALook.length === 0 ? "" : `<p style="margin: 12px 0 0; font-size: 13px; color: #9ca3af;">this doesn't mean something's wrong. it means the numbers didn't match cleanly.</p>`}
+  </div>
+
+  <!-- 6. weekly snapshot -->
+  <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin: 24px 0;">
+    <h2 style="font-size: 15px; margin: 0 0 16px; color: #374151; font-weight: 600;">this week</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">paid</td>
+        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${summary.currency} ${summary.totalPaid.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">outstanding</td>
+        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${summary.invoiceCount}</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">overdue</td>
+        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${overdue.length}</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">flagged</td>
+        <td style="padding: 6px 0; text-align: right; font-weight: 600;">${worthALook.length}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 7. footer / controls -->
   <div style="text-align: center; padding: 24px 0 8px; border-top: 1px solid #e5e7eb; margin-top: 32px;">
     <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-      Powered by <strong>Quiet Ledge</strong> — Know what you're owed.
+      thawline reads your gmail · read-only, always
     </p>
-    <p style="font-size: 11px; color: #d1d5db; margin: 4px 0 0;">
-      Generated ${formatDate(digest.generatedAt)}
+    <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0;">
+      your data doesn't train anything · deletes on cancel
+    </p>
+    <p style="font-size: 12px; color: #b0b6bf; margin: 12px 0 0;">
+      adjust settings · change tier · pause digest · cancel
     </p>
   </div>
 </body>

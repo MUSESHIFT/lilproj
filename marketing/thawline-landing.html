@@ -1,0 +1,600 @@
+<style>
+  :root {
+    --bg: #faf9f7;
+    --surface: #ffffff;
+    --surface-2: #f4f2ef;
+    --ink: #24222c;
+    --ink-soft: #4a4753;
+    --ink-faint: #6f6b78;
+    --line: #e7e3dd;
+    --accent: #4f46e5;
+    --accent-soft: #eef0fe;
+    --accent-ink: #3f38c2;
+    --radius: 20px;
+    --radius-sm: 14px;
+    --maxw: 720px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141318;
+      --surface: #1c1b22;
+      --surface-2: #211f28;
+      --ink: #ecebf1;
+      --ink-soft: #c3c0cf;
+      --ink-faint: #948fa6;
+      --line: #2c2a34;
+      --accent: #8b84f5;
+      --accent-soft: #201f34;
+      --accent-ink: #b3adfb;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --bg: #faf9f7;
+    --surface: #ffffff;
+    --surface-2: #f4f2ef;
+    --ink: #24222c;
+    --ink-soft: #4a4753;
+    --ink-faint: #6f6b78;
+    --line: #e7e3dd;
+    --accent: #4f46e5;
+    --accent-soft: #eef0fe;
+    --accent-ink: #3f38c2;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #141318;
+    --surface: #1c1b22;
+    --surface-2: #211f28;
+    --ink: #ecebf1;
+    --ink-soft: #c3c0cf;
+    --ink-faint: #948fa6;
+    --line: #2c2a34;
+    --accent: #8b84f5;
+    --accent-soft: #201f34;
+    --accent-ink: #b3adfb;
+  }
+
+  * { box-sizing: border-box; }
+
+  .ql-page {
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  .ql-page p { margin: 0; }
+
+  .ql-wrap {
+    width: 100%;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* nav */
+  .ql-nav {
+    padding: 22px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid transparent;
+  }
+  .ql-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .ql-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .tl-glyph {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+  }
+  .ql-wordmark {
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+  .ql-nav-cta {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 15px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    transition: color .2s, border-color .2s;
+  }
+  .ql-nav-cta:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+  /* buttons */
+  .ql-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 15px 30px;
+    border-radius: 999px;
+    transition: transform .15s ease, box-shadow .2s ease, filter .2s;
+    box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  .ql-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+  .ql-btn:active { transform: translateY(0); }
+
+  /* sections */
+  section { padding: 66px 0; }
+  .ql-hero { padding: 60px 0 54px; }
+
+  h1.ql-headline {
+    font-size: clamp(2rem, 6.2vw, 3.15rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+    margin: 0 0 22px;
+    text-transform: lowercase;
+    max-width: 15ch;
+  }
+  .ql-subhead {
+    font-size: clamp(1.05rem, 2.6vw, 1.22rem);
+    color: var(--ink-soft);
+    max-width: 40ch;
+    margin: 0 0 30px;
+  }
+  .ql-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .ql-fineprint {
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+
+  .ql-eyebrow {
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent-ink);
+    margin: 0 0 14px;
+  }
+  h2.ql-h2 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    margin: 0 0 20px;
+    text-transform: lowercase;
+    max-width: 20ch;
+  }
+
+  /* problem narrative */
+  .ql-problem { background: var(--surface-2); }
+  .ql-narrative p {
+    font-size: clamp(1.02rem, 2.3vw, 1.16rem);
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+    max-width: 54ch;
+  }
+  .ql-narrative p:last-child { margin-bottom: 0; }
+  .ql-narrative .ql-emph {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* digest cards */
+  .ql-digest-lead {
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    margin-bottom: 30px;
+    max-width: 46ch;
+  }
+  .ql-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .ql-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px 24px;
+  }
+  .ql-card-tag {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+    text-transform: lowercase;
+  }
+  .ql-card h3 {
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    text-transform: lowercase;
+  }
+  .ql-card p {
+    font-size: 0.98rem;
+    color: var(--ink-soft);
+  }
+  .ql-digest-note {
+    margin-top: 22px;
+    font-size: 15px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  /* trust points */
+  .ql-trust { background: var(--surface-2); }
+  .ql-trust-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .ql-trust-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+  }
+  .ql-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 10px;
+  }
+  .ql-trust-list li b { color: var(--ink); font-weight: 600; }
+
+  /* who it's for */
+  .ql-who p {
+    font-size: clamp(1.02rem, 2.3vw, 1.16rem);
+    color: var(--ink-soft);
+    max-width: 54ch;
+    margin-bottom: 16px;
+  }
+  .ql-who .ql-emph { color: var(--ink); font-weight: 500; }
+  .ql-who ul {
+    margin: 0 0 22px;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+  }
+  .ql-who ul li {
+    padding-left: 26px;
+    position: relative;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+  }
+  .ql-who ul li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 11px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: .6;
+  }
+
+  /* pricing */
+  .ql-pricing { background: var(--surface-2); }
+  .ql-tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+  .ql-tier {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+  .ql-tier.is-featured {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    box-shadow: 0 12px 34px -22px color-mix(in srgb, var(--accent) 80%, transparent);
+  }
+  .ql-tier-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: lowercase;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .ql-tier-price {
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .ql-tier-price span {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--ink-faint);
+  }
+  .ql-tier-sub {
+    font-size: 0.9rem;
+    color: var(--accent-ink);
+    margin: 0 0 16px;
+  }
+  .ql-tier-desc {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .ql-pricing-note {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 15px;
+    color: var(--ink-faint);
+  }
+
+  /* promises */
+  .ql-promises-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 24px;
+  }
+  .ql-promises-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    color: var(--ink-soft);
+    font-size: 1rem;
+  }
+  .ql-check {
+    flex: none;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  /* final cta */
+  .ql-final {
+    text-align: center;
+  }
+  .ql-final-card {
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+    border-radius: var(--radius);
+    padding: 48px 32px;
+  }
+  .ql-final h2 {
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ql-final p {
+    color: var(--ink-soft);
+    max-width: 42ch;
+    margin: 0 auto 28px;
+    font-size: 1.08rem;
+  }
+
+  /* footer */
+  .ql-footer {
+    border-top: 1px solid var(--line);
+    padding: 34px 0 48px;
+  }
+  .ql-footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+  .ql-footer-inner a { color: var(--ink-faint); text-decoration: none; }
+  .ql-footer-inner a:hover { color: var(--ink-soft); }
+
+  @media (max-width: 620px) {
+    section { padding: 48px 0; }
+    .ql-grid { grid-template-columns: 1fr; }
+    .ql-tiers { grid-template-columns: 1fr; }
+    .ql-promises-list { grid-template-columns: 1fr; }
+    .ql-nav-cta { display: none; }
+  }
+</style>
+
+<div class="ql-page">
+
+  <nav class="ql-nav">
+    <div class="ql-wrap ql-nav-inner">
+      <a class="ql-mark" href="#top">
+        <span class="tl-glyph">tl</span>
+        <span class="ql-wordmark">thawline</span>
+      </a>
+      <a class="ql-nav-cta" href="#start">start free</a>
+    </div>
+  </nav>
+
+  <header class="ql-hero" id="top">
+    <div class="ql-wrap">
+      <h1 class="ql-headline">your invoices didn't disappear. your nervous system just stopped opening them.</h1>
+      <p class="ql-subhead">thawline reads your gmail for you. every week, it tells you what you're owed, what's overdue, and what's worth a second look — in plain language, without the freeze.</p>
+      <div class="ql-hero-actions">
+        <a class="ql-btn" href="#start">start free</a>
+        <span class="ql-fineprint">no credit card · one email a week</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="ql-problem">
+    <div class="ql-wrap ql-narrative">
+      <p class="ql-eyebrow">what freeze looks like</p>
+      <h2 class="ql-h2">the folder exists. you made it.</h2>
+      <p>you named it something like "invoices 2024" or "money stuff DO NOT IGNORE." you haven't opened it in six weeks.</p>
+      <p><span class="ql-emph">this is not a discipline problem, not laziness</span> — this is what freeze looks like when it lives in your inbox. your nervous system learned money admin means bad news, so it makes the folder a room you can't enter.</p>
+      <p>the money doesn't go away. it just sits there, accruing silence. <span class="ql-emph">thawline goes in the room for you.</span></p>
+    </div>
+  </section>
+
+  <section class="ql-digest">
+    <div class="ql-wrap">
+      <p class="ql-eyebrow">what's inside</p>
+      <h2 class="ql-h2">the weekly digest</h2>
+      <p class="ql-digest-lead">one email a week. no dashboard, no color-coded anxiety. four plain things:</p>
+
+      <div class="ql-grid">
+        <div class="ql-card">
+          <span class="ql-card-tag">what you're owed</span>
+          <h3>unpaid invoices you sent</h3>
+          <p>the ones you sent and forgot, listed plainly with their age — so you can see them without going looking.</p>
+        </div>
+        <div class="ql-card">
+          <span class="ql-card-tag">what's overdue</span>
+          <h3>past the due date, named plainly</h3>
+          <p>no alarm, no red. just the fact that a date has passed, held steady so you can decide what you want to do.</p>
+        </div>
+        <div class="ql-card">
+          <span class="ql-card-tag">what arrived</span>
+          <h3>payments that landed</h3>
+          <p>the good part, too. the money that came in, so the digest isn't only the hard stuff.</p>
+        </div>
+        <div class="ql-card">
+          <span class="ql-card-tag">worth a look</span>
+          <h3>partial payments, mismatches, double charges</h3>
+          <p>it says "worth a look" — never "you got cheated." it flags, it doesn't accuse. you decide.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ql-trust">
+    <div class="ql-wrap">
+      <p class="ql-eyebrow">what it does</p>
+      <h2 class="ql-h2">quiet, read-only, and yours</h2>
+      <ul class="ql-trust-list">
+        <li><span class="ql-dot"></span><span>reads your gmail <b>read-only</b>, minimum scope only — it never moves, sends, or responds to anything.</span></li>
+        <li><span class="ql-dot"></span><span>your data <b>doesn't train anything</b>. no ads. you pay, so it answers to you.</span></li>
+        <li><span class="ql-dot"></span><span>cancel means <b>delete, not archive</b> — your data leaves when you do.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ql-who">
+    <div class="ql-wrap">
+      <p class="ql-eyebrow">who it's for</p>
+      <h2 class="ql-h2">if any of this is you</h2>
+      <ul>
+        <li>you send invoices and forget you sent them.</li>
+        <li>you've done unpaid work and aren't sure how much.</li>
+        <li>your relationship with money admin is close-the-tab-deal-with-it-later.</li>
+      </ul>
+      <p><span class="ql-emph">you are not bad at money</span> — your nervous system was protecting you. thawline is the handoff.</p>
+    </div>
+  </section>
+
+  <section class="ql-pricing">
+    <div class="ql-wrap">
+      <p class="ql-eyebrow">pricing</p>
+      <h2 class="ql-h2">honest tiers. move between them anytime.</h2>
+      <div class="ql-tiers">
+        <div class="ql-tier">
+          <p class="ql-tier-name">free</p>
+          <p class="ql-tier-price">$0</p>
+          <p class="ql-tier-sub">always real, not a trial</p>
+          <p class="ql-tier-desc">the digest, up to 10 invoices a month. no card.</p>
+        </div>
+        <div class="ql-tier is-featured">
+          <p class="ql-tier-name">standard</p>
+          <p class="ql-tier-price">$9<span> / mo</span></p>
+          <p class="ql-tier-sub">the full thawline</p>
+          <p class="ql-tier-desc">unlimited tracking, mismatch and duplicate flagging, your own overdue thresholds.</p>
+        </div>
+        <div class="ql-tier">
+          <p class="ql-tier-name">sliding scale</p>
+          <p class="ql-tier-price">$3<span> / mo</span></p>
+          <p class="ql-tier-sub">down to, no questions</p>
+          <p class="ql-tier-desc">same standard features. no proof, no questions asked.</p>
+        </div>
+      </div>
+      <p class="ql-pricing-note">move tiers anytime. the free tier is always real.</p>
+    </div>
+  </section>
+
+  <section class="ql-promises">
+    <div class="ql-wrap">
+      <p class="ql-eyebrow">the promises</p>
+      <h2 class="ql-h2">what stays true</h2>
+      <ul class="ql-promises-list">
+        <li><span class="ql-check">✓</span><span>read-only, always</span></li>
+        <li><span class="ql-check">✓</span><span>minimum-scope gmail</span></li>
+        <li><span class="ql-check">✓</span><span>no training on your financial data</span></li>
+        <li><span class="ql-check">✓</span><span>no ads — you pay, it answers to you</span></li>
+        <li><span class="ql-check">✓</span><span>"worth a look" is never a confident accusation</span></li>
+        <li><span class="ql-check">✓</span><span>cancel anytime, your data deletes</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ql-final" id="start">
+    <div class="ql-wrap">
+      <div class="ql-final-card">
+        <h2 class="ql-h2">connect your gmail. get your first digest.</h2>
+        <p>no credit card. one email a week, telling you where your money is.</p>
+        <a class="ql-btn" href="#start">start free</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ql-footer">
+    <div class="ql-wrap ql-footer-inner">
+      <a class="ql-mark" href="#top">
+        <span class="tl-glyph">tl</span>
+        <span class="ql-wordmark">thawline</span>
+      </a>
+      <span>the tool that handles the money-admin your nervous system won't let you open.</span>
+    </div>
+  </footer>
+
+</div>

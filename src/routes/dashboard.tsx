@@ -211,10 +211,10 @@ function DashboardPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-              ql
+              tl
             </span>
             <span className="text-lg font-semibold tracking-tight text-gray-900">
-              Quiet Ledge
+              thawline
             </span>
           </Link>
           <div className="flex items-center gap-3">

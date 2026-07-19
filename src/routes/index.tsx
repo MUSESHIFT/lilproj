@@ -9,9 +9,9 @@ const getBusinessName = createServerFn({ method: "GET" }).handler(async () => {
     const cfg = JSON.parse(await readFile("site.json", "utf8")) as {
       businessName?: string;
     };
-    return cfg.businessName?.trim() ?? "Quiet Ledge";
+    return cfg.businessName?.trim() ?? "thawline";
   } catch {
-    return "Quiet Ledge";
+    return "thawline";
   }
 });
 
@@ -42,10 +42,10 @@ function Nav({ user }: { user: { email: string } | null }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <a href="/" className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-            ql
+            tl
           </span>
           <span className="text-lg font-semibold tracking-tight text-gray-900">
-            Quiet Ledge
+            thawline
           </span>
         </a>
         <div className="flex items-center gap-3">
@@ -114,7 +114,7 @@ function Hero() {
           </h1>
 
           <p className="mt-6 text-lg leading-relaxed text-gray-600 sm:text-xl">
-            Quiet Ledge connects to your email inbox, automatically finds every invoice and
+            thawline connects to your email inbox, automatically finds every invoice and
             payment, cross-checks them for discrepancies, and sends you a simple weekly
             digest. No spreadsheets, no data entry, no missed payments.
           </p>
@@ -150,7 +150,7 @@ function HowItWorks() {
       step: "1",
       title: "Connect your inbox",
       description:
-        "Link your Gmail account with one click. Quiet Ledge works in the background — no setup, no folder rules, no manual tagging.",
+        "Link your Gmail account with one click. thawline works in the background — no setup, no folder rules, no manual tagging.",
       icon: (
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -260,7 +260,7 @@ function Features() {
     {
       title: "Zero data entry",
       description:
-        "No forms, no uploads, no spreadsheets. Quiet Ledge works entirely from your inbox — the data is already there.",
+        "No forms, no uploads, no spreadsheets. thawline works entirely from your inbox — the data is already there.",
       icon: (
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
@@ -428,9 +428,9 @@ function Footer() {
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-              ql
+              tl
             </span>
-            <span className="text-sm font-semibold text-gray-900">Quiet Ledge</span>
+            <span className="text-sm font-semibold text-gray-900">thawline</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <a href="#" className="transition hover:text-gray-700">
@@ -444,7 +444,7 @@ function Footer() {
             </a>
           </div>
           <p className="text-sm text-gray-400">
-            &copy; {new Date().getFullYear()} Quiet Ledge. All rights reserved.
+            &copy; {new Date().getFullYear()} thawline. All rights reserved.
           </p>
         </div>
       </div>
