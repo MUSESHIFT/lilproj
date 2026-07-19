@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,18 +8,18 @@ const __dirname = dirname(__filename);
 const DB_DIR = join(__dirname, "..", "..", "data");
 const DB_PATH = join(DB_DIR, "invoicesleuth.db");
 
-let _db: Database.Database | null = null;
+let _db: Database | null = null;
 
-export function getDb(): Database.Database {
+export function getDb(): Database {
   if (_db) return _db;
 
   if (!existsSync(DB_DIR)) {
     mkdirSync(DB_DIR, { recursive: true });
   }
 
-  _db = new Database(DB_PATH);
-  _db.pragma("journal_mode = WAL");
-  _db.pragma("foreign_keys = ON");
+  _db = new Database(DB_PATH, { create: true });
+  _db.exec("PRAGMA journal_mode = WAL;");
+  _db.exec("PRAGMA foreign_keys = ON;");
 
   // Create tables
   _db.exec(`
@@ -75,7 +75,9 @@ export function getDb(): Database.Database {
   `);
 
   // Add classification columns to emails (idempotent — safe to re-run)
-  const emailCols = _db.pragma("table_info(emails)") as { name: string }[];
+  const emailCols = _db
+    .query("PRAGMA table_info(emails)")
+    .all() as { name: string }[];
   const emailColNames = new Set(emailCols.map((c) => c.name));
   const newEmailCols = [
     { name: "classified_as", def: "TEXT" },

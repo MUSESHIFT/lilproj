@@ -13,6 +13,16 @@ export default defineConfig({
     // rejects a proxied request with "Blocked request".
     allowedHosts: true,
   },
+  // bun:sqlite is a Bun builtin, resolved at runtime — keep it out of the bundle
+  // so rollup doesn't try (and fail) to resolve it during the SSR build.
+  build: {
+    rollupOptions: {
+      external: ["bun:sqlite"],
+    },
+  },
+  ssr: {
+    external: ["bun:sqlite"],
+  },
   plugins: [
     tailwindcss(),
     tsConfigPaths({
