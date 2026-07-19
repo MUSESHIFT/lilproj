@@ -436,9 +436,43 @@
   .ql-footer-inner a { color: var(--ink-faint); text-decoration: none; }
   .ql-footer-inner a:hover { color: var(--ink-soft); }
 
+  /* how it works */
+  .ql-how { border-top: 1px solid var(--line); }
+  .ql-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .ql-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .ql-step h3 {
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    text-transform: lowercase;
+  }
+  .ql-step p {
+    font-size: 0.98rem;
+    color: var(--ink-soft);
+  }
+
   @media (max-width: 620px) {
     section { padding: 48px 0; }
     .ql-grid { grid-template-columns: 1fr; }
+    .ql-steps { grid-template-columns: 1fr; }
     .ql-tiers { grid-template-columns: 1fr; }
     .ql-promises-list { grid-template-columns: 1fr; }
     .ql-nav-cta { display: none; }
@@ -459,14 +493,39 @@
 
   <header class="ql-hero" id="top">
     <div class="ql-wrap">
+      <p class="ql-eyebrow">a weekly money digest for people who freelance</p>
       <h1 class="ql-headline">your invoices didn't disappear. your nervous system just stopped opening them.</h1>
-      <p class="ql-subhead">thawline reads your gmail for you. every week, it tells you what you're owed, what's overdue, and what's worth a second look — in plain language, without the freeze.</p>
+      <p class="ql-subhead">thawline connects to your gmail and emails you one calm summary a week — what you're owed, what's overdue, and what's worth a second look. no dashboard, no spreadsheet, no folder rules.</p>
       <div class="ql-hero-actions">
         <a class="ql-btn" href="#start">start free</a>
         <span class="ql-fineprint">no credit card · one email a week</span>
       </div>
     </div>
   </header>
+
+  <section class="ql-how">
+    <div class="ql-wrap">
+      <p class="ql-eyebrow">how it works</p>
+      <h2 class="ql-h2">connect it once. it does the rest.</h2>
+      <div class="ql-steps">
+        <div class="ql-step">
+          <span class="ql-step-num">1</span>
+          <h3>connect your gmail</h3>
+          <p>one click, read-only. no folders to make, no rules to set up, nothing to upload.</p>
+        </div>
+        <div class="ql-step">
+          <span class="ql-step-num">2</span>
+          <h3>thawline reads the money</h3>
+          <p>it scans your inbox for invoices you sent, bills you owe, and payments that landed — and quietly matches them up.</p>
+        </div>
+        <div class="ql-step">
+          <span class="ql-step-num">3</span>
+          <h3>you get one email a week</h3>
+          <p>what you're owed, what's overdue, what arrived, and anything worth a look. that's the whole product.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section class="ql-problem">
     <div class="ql-wrap ql-narrative">
