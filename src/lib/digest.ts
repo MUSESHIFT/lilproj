@@ -259,7 +259,7 @@ export function formatDigestAsText(digest: DigestData): string {
   const lines: string[] = [];
 
   lines.push("═══════════════════════════════════════════");
-  lines.push("  InvoiceSleuth — Weekly Finance Digest");
+  lines.push("  Quiet Ledge — Weekly Finance Digest");
   lines.push("═══════════════════════════════════════════");
   lines.push("");
   lines.push(
@@ -341,8 +341,8 @@ export function formatDigestAsText(digest: DigestData): string {
   }
 
   lines.push("───────────────────────────────────────────");
-  lines.push("  Powered by InvoiceSleuth");
-  lines.push("  https://invoicesleuth.com");
+  lines.push("  Powered by Quiet Ledge");
+  lines.push("  https://quietledge.com");
   lines.push("───────────────────────────────────────────");
 
   return lines.join("\n");
@@ -382,7 +382,7 @@ export function formatDigestAsHtml(digest: DigestData): string {
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937; line-height: 1.6;">
   <div style="text-align: center; padding: 24px 0; border-bottom: 2px solid #4f46e5;">
-    <h1 style="font-size: 22px; color: #4f46e5; margin: 0;">📊 InvoiceSleuth Weekly Digest</h1>
+    <h1 style="font-size: 22px; color: #4f46e5; margin: 0;">📊 Quiet Ledge Weekly Digest</h1>
     <p style="color: #6b7280; margin: 8px 0 0; font-size: 14px;">
       ${dateRange.start} → ${dateRange.end}
     </p>
@@ -474,7 +474,7 @@ export function formatDigestAsHtml(digest: DigestData): string {
   <!-- Footer -->
   <div style="text-align: center; padding: 24px 0 8px; border-top: 1px solid #e5e7eb; margin-top: 32px;">
     <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-      Powered by <strong>InvoiceSleuth</strong> — Know what you're owed.
+      Powered by <strong>Quiet Ledge</strong> — Know what you're owed.
     </p>
     <p style="font-size: 11px; color: #d1d5db; margin: 4px 0 0;">
       Generated ${formatDate(digest.generatedAt)}
