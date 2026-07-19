@@ -74,6 +74,37 @@ export function getDb(): Database.Database {
     )
   `);
 
+  // Add classification columns to emails (idempotent — safe to re-run)
+  const emailCols = _db.pragma("table_info(emails)") as { name: string }[];
+  const emailColNames = new Set(emailCols.map((c) => c.name));
+  const newEmailCols = [
+    { name: "classified_as", def: "TEXT" },
+    { name: "extracted_amount", def: "REAL" },
+    { name: "extracted_currency", def: "TEXT" },
+    { name: "extracted_invoice_number", def: "TEXT" },
+    { name: "extracted_due_date", def: "TEXT" },
+    { name: "extracted_sender_name", def: "TEXT" },
+  ];
+  for (const col of newEmailCols) {
+    if (!emailColNames.has(col.name)) {
+      _db.exec(`ALTER TABLE emails ADD COLUMN ${col.name} ${col.def}`);
+    }
+  }
+
+  // Discrepancies table
+  _db.exec(`
+    CREATE TABLE IF NOT EXISTS discrepancies (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      email_id TEXT NOT NULL,
+      related_email_id TEXT,
+      type TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      amount_diff REAL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
   // Create indexes
   _db.exec(`
     CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
@@ -82,6 +113,8 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_gmail_tokens_user_id ON gmail_tokens(user_id);
     CREATE INDEX IF NOT EXISTS idx_emails_user_id ON emails(user_id);
     CREATE INDEX IF NOT EXISTS idx_emails_gmail_id ON emails(gmail_id);
+    CREATE INDEX IF NOT EXISTS idx_discrepancies_user_id ON discrepancies(user_id);
+    CREATE INDEX IF NOT EXISTS idx_discrepancies_email_id ON discrepancies(email_id);
   `);
 
   return _db;

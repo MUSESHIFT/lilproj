@@ -7,8 +7,10 @@ import {
   fetchRecentEmails,
   getEmailCount,
 } from "~/lib/gmail";
+import { processInbox, getPipelineStats } from "~/lib/pipeline";
 import type { User } from "~/lib/auth";
 import type { GmailConnection } from "~/lib/gmail";
+import type { PipelineStats } from "~/lib/pipeline";
 
 export const Route = createFileRoute("/dashboard")({
   validateSearch: (
@@ -24,23 +26,28 @@ export const Route = createFileRoute("/dashboard")({
     const { user } = await getCurrentUser();
     const gmailConnection = user ? await getGmailConnection() : { connected: false };
     const emailCount = user ? await getEmailCount() : { count: 0 };
-    return { user, gmail: gmailConnection, emailCount: emailCount.count, search };
+    const pipelineStats = user ? await getPipelineStats() : null;
+    return { user, gmail: gmailConnection, emailCount: emailCount.count, pipelineStats, search };
   },
   component: DashboardPage,
 });
 
 function DashboardPage() {
-  const { user, gmail: initialGmail, emailCount: initialEmailCount, search } =
+  const { user, gmail: initialGmail, emailCount: initialEmailCount, pipelineStats: initialPipelineStats, search } =
     Route.useLoaderData();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
   const [gmail, setGmail] = useState<GmailConnection>(initialGmail);
   const [emailCount, setEmailCount] = useState(initialEmailCount);
+  const [pipelineStats, setPipelineStats] = useState<PipelineStats | null>(initialPipelineStats);
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [fetchResult, setFetchResult] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [processError, setProcessError] = useState<string | null>(null);
+  const [processResult, setProcessResult] = useState<string | null>(null);
 
   // Show status messages based on search params
   useEffect(() => {
@@ -130,6 +137,47 @@ function DashboardPage() {
     // Navigate to the OAuth initiation route
     window.location.href = "/api/auth/google";
   };
+
+  const handleProcessInbox = useCallback(async () => {
+    setProcessing(true);
+    setProcessError(null);
+    setProcessResult(null);
+    try {
+      const result = await processInbox();
+      if (!result.success || result.error) {
+        setProcessError(result.error || "Processing failed");
+      } else {
+        // Build result message
+        const parts: string[] = [];
+        if (result.classified > 0) {
+          parts.push(`${result.classified} emails classified`);
+        }
+        const details: string[] = [];
+        if (result.invoices > 0) details.push(`${result.invoices} invoices`);
+        if (result.paymentsReceived > 0) details.push(`${result.paymentsReceived} payments received`);
+        if (result.billsSent > 0) details.push(`${result.billsSent} bills sent`);
+        if (result.paymentsMade > 0) details.push(`${result.paymentsMade} payments made`);
+        if (details.length > 0) {
+          parts.push(`Found: ${details.join(", ")}`);
+        }
+        if (result.discrepancies.length > 0) {
+          parts.push(`${result.discrepancies.length} discrepancies flagged`);
+        } else if (result.classified > 0) {
+          parts.push("No discrepancies found");
+        }
+        setProcessResult(parts.join(" • ") || "No new emails to process.");
+        // Refresh stats
+        const stats = await getPipelineStats();
+        setPipelineStats(stats);
+      }
+    } catch (err) {
+      setProcessError(
+        err instanceof Error ? err.message : "Failed to process inbox",
+      );
+    } finally {
+      setProcessing(false);
+    }
+  }, []);
 
   return (
     <div className="min-h-dvh bg-gray-50">
@@ -250,6 +298,15 @@ function DashboardPage() {
                         {fetching ? "Fetching..." : "Fetch Emails"}
                       </button>
 
+                      {/* Process Invoices button */}
+                      <button
+                        onClick={handleProcessInbox}
+                        disabled={processing}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        {processing ? "Processing..." : "Process Invoices"}
+                      </button>
+
                       {/* Disconnect button */}
                       <button
                         onClick={handleDisconnect}
@@ -281,79 +338,172 @@ function DashboardPage() {
                   <p className="text-sm text-green-700">{fetchResult}</p>
                 </div>
               )}
+              {processError && (
+                <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
+                  <p className="text-sm text-red-700">{processError}</p>
+                </div>
+              )}
+              {processResult && (
+                <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3">
+                  <p className="text-sm text-green-700">{processResult}</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Placeholder cards for future features */}
-          <div className="mt-6 grid gap-6 sm:grid-cols-3">
-            <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                  />
-                </svg>
-              </div>
-              <h3 className="mt-4 font-semibold text-gray-900">Invoices</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                View and manage all detected invoices in one place.
-              </p>
-            </div>
+          {/* Pipeline Stats & Discrepancies */}
+          {pipelineStats && pipelineStats.processedEmails > 0 ? (
+            <div className="mt-6 space-y-6">
+              {/* Stats cards */}
+              <div className="grid gap-6 sm:grid-cols-3">
+                <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 text-2xl font-bold text-gray-900">{pipelineStats.invoicesFound}</h3>
+                  <p className="mt-1 text-sm text-gray-500">Invoices found</p>
+                </div>
 
-            <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                  />
-                </svg>
-              </div>
-              <h3 className="mt-4 font-semibold text-gray-900">
-                Weekly Digest
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Your finance summary delivered every week via email.
-              </p>
-            </div>
+                <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-600">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 text-2xl font-bold text-gray-900">{pipelineStats.paymentsMatched}</h3>
+                  <p className="mt-1 text-sm text-gray-500">Payments matched</p>
+                </div>
 
-            <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                  />
-                </svg>
+                <div className={`rounded-xl border shadow-sm p-6 ${pipelineStats.discrepanciesCount > 0 ? "border-red-200 bg-red-50" : "border-gray-100 bg-white"}`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${pipelineStats.discrepanciesCount > 0 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}>
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 text-2xl font-bold text-gray-900">{pipelineStats.discrepanciesCount}</h3>
+                  <p className="mt-1 text-sm text-gray-500">Discrepancies flagged</p>
+                </div>
               </div>
-              <h3 className="mt-4 font-semibold text-gray-900">Alerts</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Underpayments and discrepancies flagged automatically.
-              </p>
+
+              {/* Discrepancies list */}
+              {pipelineStats.discrepancies.length > 0 && (
+                <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+                  <div className="border-b border-gray-100 px-6 py-4">
+                    <h3 className="font-semibold text-gray-900">Discrepancies</h3>
+                    <p className="mt-0.5 text-sm text-gray-500">Issues that need your attention</p>
+                  </div>
+                  <div className="divide-y divide-gray-50">
+                    {pipelineStats.discrepancies.map((d, i) => {
+                      const typeStyles: Record<string, { bg: string; text: string; label: string }> = {
+                        underpayment: { bg: "bg-amber-100", text: "text-amber-700", label: "Underpayment" },
+                        overpayment: { bg: "bg-blue-100", text: "text-blue-700", label: "Overpayment" },
+                        missing_payment: { bg: "bg-red-100", text: "text-red-700", label: "Missing Payment" },
+                        overdue: { bg: "bg-red-200", text: "text-red-800", label: "Overdue" },
+                      };
+                      const style = typeStyles[d.type] || { bg: "bg-gray-100", text: "text-gray-700", label: d.type };
+                      return (
+                        <div key={i} className="px-6 py-4">
+                          <div className="flex items-start gap-3">
+                            <span className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}>
+                              {style.label}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm text-gray-700">{d.description}</p>
+                              {d.amountDiff !== null && (
+                                <p className="mt-1 text-xs text-gray-400">
+                                  Amount difference: ${d.amountDiff.toFixed(2)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          ) : pipelineStats && pipelineStats.totalEmails > 0 ? (
+            <div className="mt-6 grid gap-6 sm:grid-cols-3">
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 font-semibold text-gray-900">Invoices</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {pipelineStats.unprocessedEmails > 0
+                    ? `${pipelineStats.unprocessedEmails} emails waiting to be processed. Click "Process Invoices" above.`
+                    : "View and manage all detected invoices in one place."}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 font-semibold text-gray-900">Weekly Digest</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Your finance summary delivered every week via email.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 font-semibold text-gray-900">Alerts</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Underpayments and discrepancies flagged automatically.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-6 sm:grid-cols-3">
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 font-semibold text-gray-900">Invoices</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  View and manage all detected invoices in one place.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 font-semibold text-gray-900">Weekly Digest</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Your finance summary delivered every week via email.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 font-semibold text-gray-900">Alerts</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Underpayments and discrepancies flagged automatically.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
