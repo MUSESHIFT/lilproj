@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { readFile } from "node:fs/promises";
 import { getCurrentUser, logout } from "~/lib/auth";
 import { useState } from "react";
+import { HeroGradient } from "~/components/HeroGradient";
 
 const getBusinessName = createServerFn({ method: "GET" }).handler(async () => {
   try {
@@ -90,13 +91,9 @@ function Nav({ user }: { user: { email: string } | null }) {
 function Hero() {
   return (
     <section className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
-      {/* Subtle background decoration */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 right-0 h-[500px] w-[500px] rounded-full bg-indigo-50 blur-3xl" />
-        <div className="absolute -bottom-32 left-0 h-[400px] w-[400px] rounded-full bg-violet-50 blur-3xl" />
-      </div>
+      <HeroGradient />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           {/* Badge */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700">
