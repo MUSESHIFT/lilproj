@@ -454,165 +454,164 @@ function DashboardPage() {
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Weekly Digest Section */}
-            <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
-              <div className="border-b border-gray-100 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Weekly Digest</h3>
-                    <p className="mt-0.5 text-sm text-gray-500">
-                      Auto-generated finance summary from your pipeline data
-                    </p>
+              {/* Weekly Digest Section */}
+              <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+                <div className="border-b border-gray-100 px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Weekly Digest</h3>
+                      <p className="mt-0.5 text-sm text-gray-500">
+                        Auto-generated finance summary from your pipeline data
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleGenerateDigest}
+                      disabled={digesting}
+                      className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {digesting ? "Generating..." : "Generate Digest"}
+                    </button>
                   </div>
-                  <button
-                    onClick={handleGenerateDigest}
-                    disabled={digesting}
-                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
-                  >
-                    {digesting ? "Generating..." : "Generate Digest"}
-                  </button>
                 </div>
-              </div>
 
-              {/* Digest error */}
-              {digestError && (
-                <div className="border-b border-red-100 bg-red-50 px-6 py-3">
-                  <p className="text-sm text-red-700">{digestError}</p>
-                </div>
-              )}
-
-              {/* Digest output */}
-              {digest && (
-                <div className="divide-y divide-gray-50">
-                  {/* Date range badge */}
-                  <div className="px-6 py-3">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                      </svg>
-                      {digest.dateRange.start} → {digest.dateRange.end}
-                    </span>
+                {/* Digest error */}
+                {digestError && (
+                  <div className="border-b border-red-100 bg-red-50 px-6 py-3">
+                    <p className="text-sm text-red-700">{digestError}</p>
                   </div>
+                )}
 
-                  {/* Summary cards */}
-                  <div className="grid grid-cols-2 gap-4 px-6 py-4 sm:grid-cols-4">
-                    <div>
-                      <p className="text-xs text-gray-500">Invoiced</p>
-                      <p className="mt-0.5 text-lg font-bold text-gray-900">
-                        {digest.summary.currency} {digest.summary.totalInvoiced.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-gray-400">{digest.summary.invoiceCount} invoice{digest.summary.invoiceCount !== 1 ? "s" : ""}</p>
+                {/* Digest output */}
+                {digest && (
+                  <div className="divide-y divide-gray-50">
+                    {/* Date range badge */}
+                    <div className="px-6 py-3">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        {digest.dateRange.start} → {digest.dateRange.end}
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Paid</p>
-                      <p className="mt-0.5 text-lg font-bold text-green-600">
-                        {digest.summary.currency} {digest.summary.totalPaid.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-gray-400">{digest.summary.paymentCount} payment{digest.summary.paymentCount !== 1 ? "s" : ""}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Outstanding</p>
-                      <p className={`mt-0.5 text-lg font-bold ${digest.summary.outstandingBalance > 0 ? "text-red-600" : "text-green-600"}`}>
-                        {digest.summary.currency} {digest.summary.outstandingBalance.toFixed(2)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Discrepancies</p>
-                      <p className={`mt-0.5 text-lg font-bold ${digest.summary.discrepancyCount > 0 ? "text-red-600" : "text-gray-900"}`}>
-                        {digest.summary.discrepancyCount}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Invoices list */}
-                  {digest.invoices.length > 0 && (
-                    <div className="px-6 py-4">
-                      <h4 className="text-sm font-semibold text-gray-700">Recent Invoices</h4>
-                      <div className="mt-2 space-y-2">
-                        {digest.invoices.map((inv, i) => (
-                          <div key={i} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900 truncate">
-                                {inv.sender || "Unknown"}
-                                {inv.invoiceNumber && (
-                                  <span className="ml-1.5 text-xs text-gray-400">#{inv.invoiceNumber}</span>
-                                )}
-                              </p>
-                              <p className="text-xs text-gray-500 truncate">{inv.subject}</p>
-                            </div>
-                            <span className="ml-3 shrink-0 text-sm font-semibold text-gray-900">
-                              {inv.currency || digest.summary.currency} {inv.amount?.toFixed(2) ?? "—"}
-                            </span>
-                          </div>
-                        ))}
+                    {/* Summary cards */}
+                    <div className="grid grid-cols-2 gap-4 px-6 py-4 sm:grid-cols-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Invoiced</p>
+                        <p className="mt-0.5 text-lg font-bold text-gray-900">
+                          {digest.summary.currency} {digest.summary.totalInvoiced.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-400">{digest.summary.invoiceCount} invoice{digest.summary.invoiceCount !== 1 ? "s" : ""}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Paid</p>
+                        <p className="mt-0.5 text-lg font-bold text-green-600">
+                          {digest.summary.currency} {digest.summary.totalPaid.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-400">{digest.summary.paymentCount} payment{digest.summary.paymentCount !== 1 ? "s" : ""}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Outstanding</p>
+                        <p className={`mt-0.5 text-lg font-bold ${digest.summary.outstandingBalance > 0 ? "text-red-600" : "text-green-600"}`}>
+                          {digest.summary.currency} {digest.summary.outstandingBalance.toFixed(2)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Discrepancies</p>
+                        <p className={`mt-0.5 text-lg font-bold ${digest.summary.discrepancyCount > 0 ? "text-red-600" : "text-gray-900"}`}>
+                          {digest.summary.discrepancyCount}
+                        </p>
                       </div>
                     </div>
-                  )}
 
-                  {/* Payments list */}
-                  {digest.payments.length > 0 && (
-                    <div className="px-6 py-4">
-                      <h4 className="text-sm font-semibold text-gray-700">Recent Payments</h4>
-                      <div className="mt-2 space-y-2">
-                        {digest.payments.map((pay, i) => (
-                          <div key={i} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900 truncate">{pay.sender || "Unknown"}</p>
-                              <p className="text-xs text-gray-500 truncate">{pay.subject}</p>
-                            </div>
-                            <span className="ml-3 shrink-0 text-sm font-semibold text-green-600">
-                              {pay.currency || digest.summary.currency} {pay.amount?.toFixed(2) ?? "—"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Discrepancies in digest */}
-                  {digest.discrepancies.length > 0 && (
-                    <div className="px-6 py-4">
-                      <h4 className="text-sm font-semibold text-red-600">Discrepancies</h4>
-                      <div className="mt-2 space-y-2">
-                        {digest.discrepancies.map((d, i) => {
-                          const typeStyles: Record<string, { bg: string; text: string; label: string }> = {
-                            underpayment: { bg: "bg-amber-100", text: "text-amber-700", label: "Underpayment" },
-                            overpayment: { bg: "bg-blue-100", text: "text-blue-700", label: "Overpayment" },
-                            missing_payment: { bg: "bg-red-100", text: "text-red-700", label: "Missing" },
-                            overdue: { bg: "bg-red-200", text: "text-red-800", label: "Overdue" },
-                          };
-                          const style = typeStyles[d.type] || { bg: "bg-gray-100", text: "text-gray-700", label: d.type };
-                          return (
-                            <div key={i} className="flex items-start gap-2.5 rounded-lg border border-red-100 bg-red-50 px-3 py-2">
-                              <span className={`mt-0.5 shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}>
-                                {style.label}
-                              </span>
-                              <div>
-                                <p className="text-sm text-gray-700">{d.description}</p>
-                                {d.amountDiff !== null && (
-                                  <p className="mt-0.5 text-xs text-gray-400">
-                                    Difference: {digest.summary.currency} {d.amountDiff.toFixed(2)}
-                                  </p>
-                                )}
+                    {/* Invoices list */}
+                    {digest.invoices.length > 0 && (
+                      <div className="px-6 py-4">
+                        <h4 className="text-sm font-semibold text-gray-700">Recent Invoices</h4>
+                        <div className="mt-2 space-y-2">
+                          {digest.invoices.map((inv, i) => (
+                            <div key={i} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {inv.sender || "Unknown"}
+                                  {inv.invoiceNumber && (
+                                    <span className="ml-1.5 text-xs text-gray-400">#{inv.invoiceNumber}</span>
+                                  )}
+                                </p>
+                                <p className="text-xs text-gray-500 truncate">{inv.subject}</p>
                               </div>
+                              <span className="ml-3 shrink-0 text-sm font-semibold text-gray-900">
+                                {inv.currency || digest.summary.currency} {inv.amount?.toFixed(2) ?? "—"}
+                              </span>
                             </div>
-                          );
-                        })}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Empty state */}
-                  {digest.invoices.length === 0 && digest.payments.length === 0 && (
-                    <div className="px-6 py-8 text-center">
-                      <p className="text-sm text-gray-400">No invoices or payments found in the last 7 days.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                    {/* Payments list */}
+                    {digest.payments.length > 0 && (
+                      <div className="px-6 py-4">
+                        <h4 className="text-sm font-semibold text-gray-700">Recent Payments</h4>
+                        <div className="mt-2 space-y-2">
+                          {digest.payments.map((pay, i) => (
+                            <div key={i} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 truncate">{pay.sender || "Unknown"}</p>
+                                <p className="text-xs text-gray-500 truncate">{pay.subject}</p>
+                              </div>
+                              <span className="ml-3 shrink-0 text-sm font-semibold text-green-600">
+                                {pay.currency || digest.summary.currency} {pay.amount?.toFixed(2) ?? "—"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Discrepancies in digest */}
+                    {digest.discrepancies.length > 0 && (
+                      <div className="px-6 py-4">
+                        <h4 className="text-sm font-semibold text-red-600">Discrepancies</h4>
+                        <div className="mt-2 space-y-2">
+                          {digest.discrepancies.map((d, i) => {
+                            const typeStyles: Record<string, { bg: string; text: string; label: string }> = {
+                              underpayment: { bg: "bg-amber-100", text: "text-amber-700", label: "Underpayment" },
+                              overpayment: { bg: "bg-blue-100", text: "text-blue-700", label: "Overpayment" },
+                              missing_payment: { bg: "bg-red-100", text: "text-red-700", label: "Missing" },
+                              overdue: { bg: "bg-red-200", text: "text-red-800", label: "Overdue" },
+                            };
+                            const style = typeStyles[d.type] || { bg: "bg-gray-100", text: "text-gray-700", label: d.type };
+                            return (
+                              <div key={i} className="flex items-start gap-2.5 rounded-lg border border-red-100 bg-red-50 px-3 py-2">
+                                <span className={`mt-0.5 shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}>
+                                  {style.label}
+                                </span>
+                                <div>
+                                  <p className="text-sm text-gray-700">{d.description}</p>
+                                  {d.amountDiff !== null && (
+                                    <p className="mt-0.5 text-xs text-gray-400">
+                                      Difference: {digest.summary.currency} {d.amountDiff.toFixed(2)}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Empty state */}
+                    {digest.invoices.length === 0 && digest.payments.length === 0 && (
+                      <div className="px-6 py-8 text-center">
+                        <p className="text-sm text-gray-400">No invoices or payments found in the last 7 days.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
           </div>
           ) : pipelineStats && pipelineStats.totalEmails > 0 ? (
             <div className="mt-6 grid gap-6 sm:grid-cols-3">
